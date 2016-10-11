@@ -28,12 +28,14 @@ func NewEmployeeController(auth utils.Authorization, dba utils.DataBaseAccessor,
 
 // Register 注册路由
 func (c EmployeeController) Register(router *mux.Router) {
-	_oAuth2 := c.auth
-	router.Handle("/api/employee/findEmployeeById/{empID}", _oAuth2.UserActionWrap(c.findEmployeeByID)).Methods(utils.MethodGET)
+	//_oAuth2 := c.auth
+	//router.Handle("/api/employee/findEmployeeById/{empID}", _oAuth2.UserActionWrap(c.findEmployeeByID)).Methods(utils.MethodGET)
+	router.HandleFunc("/api/employee/findEmployeeById/{empID}", c.findEmployeeByID).Methods(utils.MethodGET)
 }
 
 // FindEmployeeByID 根据ID获取制定的员工
-func (c EmployeeController) findEmployeeByID(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+//func (c EmployeeController) findEmployeeByID(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func (c EmployeeController) findEmployeeByID(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 
@@ -43,11 +45,11 @@ func (c EmployeeController) findEmployeeByID(w http.ResponseWriter, r *http.Requ
 
 	empModel := model.NewEmployeeModel(c.dba)
 
-	employee, err := empModel.FindEmployeeByID(empID)
+	employee := empModel.FindEmployeeByID(empID)
 
-	if err != nil {
-		c.renderer.JSON(w, http.StatusInternalServerError, employee)
-	}
+	// if err != nil {
+	// 	c.renderer.JSON(w, http.StatusInternalServerError, employee)
+	// }
 
 	c.renderer.JSON(w, http.StatusOK, employee)
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 // Server 服务器
@@ -24,6 +25,12 @@ func InitServer() *Server {
 
 	// 创建服务对象
 	s := Server{negroni.Classic()}
+
+	// 跨域请求设置
+	_cors := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
 
 	// 创建路由
 	router := mux.NewRouter()
@@ -48,8 +55,11 @@ func InitServer() *Server {
 	// 初始化员工控制器,路由注册
 	controller.NewEmployeeController(*oAuth2, *dba, renderer).Register(router)
 
+	// SSL 配置
+	router.Schemes("https")
+
 	//添加路由
-	s.UseHandler(router)
+	s.UseHandler(_cors.Handler(router))
 
 	return &s
 }

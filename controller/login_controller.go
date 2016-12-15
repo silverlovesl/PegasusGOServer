@@ -1,15 +1,20 @@
 package controller
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"pegasus/entity"
 	"pegasus/utils"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+
+	"pegasus/model"
 
 	render "gopkg.in/unrolled/render.v1"
 )
@@ -21,13 +26,16 @@ type LoginController struct {
 	auth     utils.Authorization
 }
 
-type token struct {
-	Data string `json:"token"`
+type authReuslt struct {
+	Token     string
+	LoginUser *entity.T_M_Login
+	Success   bool
+	ErrorCode string
 }
 
 // UserCredentials 用户认证
 type userCredentials struct {
-	Username string `json:"username"`
+	LoginID  string `json:"loginID"`
 	Password string `json:"password"`
 }
 
@@ -53,16 +61,35 @@ func (c LoginController) doLogin(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
+		fmt.Println(err)
 		fmt.Fprintf(w, "Error in request")
 		return
 	}
 
-	fmt.Println(user.Username, user.Password)
+	// 初始化 LoginModel
+	loginModel := model.NewLoginModel(c.dba)
+	bPwd := []byte(user.Password)
+	cryptoPwd := md5.Sum(bPwd)
+	cryptoStr := hex.EncodeToString(cryptoPwd[:])
 
-	if user.Username != "admin" || user.Password != "123" {
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Println("Failed to login")
-		fmt.Fprint(w, "Invalid credentials")
+	fmt.Println(user.LoginID, cryptoStr)
+
+	// 执行登录操作
+	loginUser := loginModel.Certificate(user.LoginID, cryptoStr)
+
+	// Login失败
+	if loginUser.LoginID == "" {
+		fmt.Println("用户名和密码不存在")
+		resp := authReuslt{LoginUser: nil, Token: "", Success: false, ErrorCode: "001"}
+		c.renderer.JSON(w, http.StatusOK, resp)
+		return
+	}
+
+	// 用户被锁住
+	if loginUser.Islock == "1" {
+		fmt.Println("被锁住的用户")
+		resp := authReuslt{LoginUser: nil, Token: "", Success: false, ErrorCode: "002"}
+		c.renderer.JSON(w, http.StatusOK, resp)
 		return
 	}
 
@@ -75,13 +102,13 @@ func (c LoginController) doLogin(w http.ResponseWriter, r *http.Request) {
 	claims["CustomUserInfo"] = struct {
 		Name string
 		Role string
-	}{user.Username, "Member"}
+	}{user.LoginID, "Member"}
 
 	signer.Claims = claims
 
 	tokenString, err := signer.SignedString(c.auth.SigningKey)
 
-	//fmt.Println(string(signingKey))
+	fmt.Println(string(tokenString))
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -90,7 +117,6 @@ func (c LoginController) doLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//create a token instance using the token string
-	resp := token{tokenString}
-
+	resp := authReuslt{LoginUser: loginUser, Token: tokenString, Success: true, ErrorCode: ""}
 	c.renderer.JSON(w, http.StatusOK, resp)
 }

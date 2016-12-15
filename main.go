@@ -5,7 +5,7 @@ import (
 	"pegasus/server"
 	"pegasus/utils"
 
-	"gopkg.in/tylerb/graceful.v1"
+	graceful "gopkg.in/tylerb/graceful.v1"
 )
 
 func main() {
@@ -21,4 +21,5 @@ func initServer() {
 	///开始运行
 	fmt.Printf("The web service is working on port %s...\n", utils.PORT)
 	graceful.Run(":"+utils.PORT, 0, srv)
+	//http.ListenAndServeTLS(":"+utils.PORT, "/etc/nginx/server.crt", "/etc/nginx/server.key", srv)
 }

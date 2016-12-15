@@ -47,9 +47,5 @@ func (c EmployeeController) findEmployeeByID(w http.ResponseWriter, r *http.Requ
 
 	employee := empModel.FindEmployeeByID(empID)
 
-	// if err != nil {
-	// 	c.renderer.JSON(w, http.StatusInternalServerError, employee)
-	// }
-
 	c.renderer.JSON(w, http.StatusOK, employee)
 }

@@ -4,11 +4,13 @@ import "os"
 
 const (
 	// PORT 端口
-	PORT string = "8088"
+	PORT string = "3000"
 	// MethodGET  Http Method GET
 	MethodGET string = "GET"
 	// MethodPOST  Http Method POST
 	MethodPOST string = "POST"
+	// MethodOPTIONS  Http Method OPTIONS
+	MethodOPTIONS string = "OPTIONS"
 )
 
 // SysConfig 系统环境变量

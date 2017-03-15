@@ -51,9 +51,12 @@ func InitServer() *Server {
 		fmt.Fprintf(w, "Pegasus Web Service is working fine !!!")
 	})
 
+	// 初始化登录用户控制器,路由注册
 	controller.NewLoginController(*oAuth2, *dba, renderer).Register(router)
 	// 初始化员工控制器,路由注册
 	controller.NewEmployeeController(*oAuth2, *dba, renderer).Register(router)
+	// 初始化工资控制器,路由注册
+	controller.NewSalaryController(*oAuth2, *dba, renderer).Register(router)
 
 	// SSL 配置
 	router.Schemes("https")

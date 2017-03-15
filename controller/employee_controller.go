@@ -28,8 +28,8 @@ func NewEmployeeController(auth utils.Authorization, dba utils.DataBaseAccessor,
 
 // Register 注册路由
 func (c EmployeeController) Register(router *mux.Router) {
-	//_oAuth2 := c.auth
-	//router.Handle("/api/employee/findEmployeeById/{empID}", _oAuth2.UserActionWrap(c.findEmployeeByID)).Methods(utils.MethodGET)
+	//_oAuth := c.auth
+	//router.Handle("/api/employee/findEmployeeById/{empID}", _oAuth.UserActionWrap(c.findEmployeeByID)).Methods(utils.MethodGET)
 	router.HandleFunc("/api/employee/findEmployeeById/{empID}", c.findEmployeeByID).Methods(utils.MethodGET)
 }
 
@@ -45,7 +45,7 @@ func (c EmployeeController) findEmployeeByID(w http.ResponseWriter, r *http.Requ
 
 	empModel := model.NewEmployeeModel(c.dba)
 
-	employee := empModel.FindEmployeeByID(empID)
+	employeeDTO := empModel.FindEmployeeByID(empID)
 
-	c.renderer.JSON(w, http.StatusOK, employee)
+	c.renderer.JSON(w, http.StatusOK, employeeDTO)
 }

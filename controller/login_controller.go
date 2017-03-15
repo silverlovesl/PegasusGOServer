@@ -95,7 +95,7 @@ func (c LoginController) doLogin(w http.ResponseWriter, r *http.Request) {
 
 	signer := jwt.New(jwt.SigningMethodHS256)
 	claims := make(jwt.MapClaims)
-	claims["iss"] = "admin"
+	claims["iss"] = loginUser.LoginID
 	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(time.Minute * 20).Unix()
 	claims["jti"] = "1"

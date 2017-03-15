@@ -24,9 +24,23 @@ func (m LoginModel) Certificate(loginID string, password string) *entity.T_M_Log
 	fmt.Println("★★★")
 	fmt.Println(loginUser)
 
-	m.dba.Table("t_m_login").Where(" login_id = ? and password =? ", loginID, password).First(&loginUser)
+	m.dba.Table("t_m_login").
+		Where(&entity.T_M_Login{LoginID: loginID, Password: password}).
+		First(&loginUser)
 
 	fmt.Println(loginUser)
+
+	return &loginUser
+}
+
+// FindLoginUserByID 根据ID获取Login用户对象
+func (m LoginModel) FindLoginUserByID(loginID string) *entity.T_M_Login {
+
+	loginUser := entity.T_M_Login{}
+
+	m.dba.Table("t_m_login").
+		Where(&entity.T_M_Login{LoginID: loginID}).
+		First(&loginUser)
 
 	return &loginUser
 }
